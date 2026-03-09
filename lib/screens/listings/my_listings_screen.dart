@@ -25,7 +25,6 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Re-initialize if user changed
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (authProvider.user?.uid != _currentUserId) {
       _currentUserId = authProvider.user?.uid;
@@ -40,7 +39,6 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
     if (authProvider.user != null) {
       listingProvider.initializeUserListingsStream(authProvider.user!.uid);
     } else {
-      // User logged out, clear listings
       listingProvider.clearUserListings();
     }
   }
@@ -108,7 +106,6 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              // Listings are already updating via stream
               await Future.delayed(const Duration(milliseconds: 500));
             },
             child: ListView.builder(

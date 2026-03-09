@@ -130,7 +130,6 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () async {
-                  // Clear user listings before signing out
                   Provider.of<ListingProvider>(context, listen: false)
                       .clearUserListings();
                   await authProvider.signOut();

@@ -263,7 +263,6 @@ class SettingsScreen extends StatelessWidget {
               );
 
               if (confirmed == true && context.mounted) {
-                // Clear user listings before signing out
                 Provider.of<ListingProvider>(context, listen: false)
                     .clearUserListings();
                 await Provider.of<AuthProvider>(context, listen: false)

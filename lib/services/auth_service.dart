@@ -6,13 +6,10 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Get current user
   User? get currentUser => _auth.currentUser;
 
-  // Stream of auth changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // Sign up with email and password
   Future<UserCredential?> signUp({
     required String email,
     required String password,
@@ -22,13 +19,10 @@ class AuthService {
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      // Send email verification
       await userCredential.user?.sendEmailVerification();
 
-      // Update display name
       await userCredential.user?.updateDisplayName(displayName);
 
-      // Create user profile in Firestore
       if (userCredential.user != null) {
         await _createUserProfile(userCredential.user!, displayName);
       }
@@ -39,7 +33,6 @@ class AuthService {
     }
   }
 
-  // Sign in with email and password
   Future<UserCredential?> signIn({
     required String email,
     required String password,
@@ -50,17 +43,13 @@ class AuthService {
         password: password,
       );
 
-      // Check if email is verified
       if (userCredential.user != null && !userCredential.user!.emailVerified) {
         throw Exception('Please verify your email before signing in');
       }
 
-      // Check if Firestore profile exists, create if missing
-      // (This handles cases where profile was manually deleted from database)
       if (userCredential.user != null) {
         final profileExists = await _checkUserProfileExists(userCredential.user!.uid);
         if (!profileExists) {
-          // Recreate missing profile
           await _createUserProfile(
             userCredential.user!,
             userCredential.user!.displayName ?? 'User',
@@ -74,12 +63,10 @@ class AuthService {
     }
   }
 
-  // Sign out
   Future<void> signOut() async {
     await _auth.signOut();
   }
 
-  // Resend verification email
   Future<void> resendVerificationEmail() async {
     try {
       await currentUser?.sendEmailVerification();
@@ -88,12 +75,10 @@ class AuthService {
     }
   }
 
-  // Reload user to update emailVerified status
   Future<void> reloadUser() async {
     await currentUser?.reload();
   }
 
-  // Create user profile in Firestore
   Future<void> _createUserProfile(User user, String displayName) async {
     final userModel = UserModel(
       uid: user.uid,
@@ -106,7 +91,6 @@ class AuthService {
     await _firestore.collection('users').doc(user.uid).set(userModel.toMap());
   }
 
-  // Check if user profile exists in Firestore
   Future<bool> _checkUserProfileExists(String uid) async {
     try {
       DocumentSnapshot doc = await _firestore.collection('users').doc(uid).get();
@@ -116,7 +100,6 @@ class AuthService {
     }
   }
 
-  // Get user profile from Firestore
   Future<UserModel?> getUserProfile(String uid) async {
     try {
       DocumentSnapshot doc = await _firestore
@@ -132,7 +115,6 @@ class AuthService {
     }
   }
 
-  // Handle Firebase Auth exceptions
   String _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'weak-password':

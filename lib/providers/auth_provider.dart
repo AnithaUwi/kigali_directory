@@ -28,14 +28,12 @@ class AuthProvider with ChangeNotifier {
 
   AuthProvider() {
     if (DEMO_MODE) {
-      // In demo mode, start as unauthenticated
       _status = AuthStatus.unauthenticated;
     } else {
       _authService.authStateChanges.listen(_onAuthStateChanged);
     }
   }
 
-  // Handle auth state changes
   Future<void> _onAuthStateChanged(User? firebaseUser) async {
     if (firebaseUser == null) {
       _status = AuthStatus.unauthenticated;
@@ -56,7 +54,6 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Load user profile from Firestore
   Future<void> _loadUserProfile() async {
     if (_user != null) {
       _userProfile = await _authService.getUserProfile(_user!.uid);
@@ -64,7 +61,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Sign up
   Future<bool> signUp({
     required String email,
     required String password,
@@ -76,7 +72,6 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
 
       if (DEMO_MODE) {
-        // Demo mode: simulate sign up
         await Future.delayed(const Duration(seconds: 1));
         _userProfile = UserModel(
           uid: 'demo-user-id',
@@ -105,7 +100,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Sign in
   Future<bool> signIn({required String email, required String password}) async {
     try {
       _isLoading = true;
@@ -113,7 +107,6 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
 
       if (DEMO_MODE) {
-        // Demo mode: accept any credentials or demo credentials
         await Future.delayed(const Duration(seconds: 1));
         _userProfile = UserModel(
           uid: 'demo-user-id',
@@ -138,7 +131,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Sign out
   Future<void> signOut() async {
     if (DEMO_MODE) {
       _userProfile = null;
@@ -151,13 +143,6 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Get method to clear listings on sign out (to be called from UI)
-  void clearListingsOnSignOut(BuildContext context) {
-    // This should be called from the UI layer before signOut
-    // to ensure listing provider clears user data
-  }
-
-  // Resend verification email
   Future<bool> resendVerificationEmail() async {
     try {
       _isLoading = true;
@@ -177,7 +162,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Check email verification status
   Future<void> checkEmailVerified() async {
     await _authService.reloadUser();
     _user = _authService.currentUser;
@@ -189,7 +173,6 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Clear error message
   void clearError() {
     _errorMessage = null;
     notifyListeners();

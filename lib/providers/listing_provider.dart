@@ -24,10 +24,8 @@ class ListingProvider with ChangeNotifier {
   Category? get selectedCategory => _selectedCategory;
   String get searchQuery => _searchQuery;
 
-  // Initialize listings stream
   void initializeListingsStream() {
     if (DEMO_MODE) {
-      // In demo mode, load mock data - defer notifyListeners to avoid calling during build
       Future.microtask(() {
         _listings = getMockListings();
         _applyFilters();
@@ -48,10 +46,8 @@ class ListingProvider with ChangeNotifier {
     }
   }
 
-  // Initialize user listings stream
   void initializeUserListingsStream(String userId) {
     if (DEMO_MODE) {
-      // In demo mode, show some mock listings as user's listings
       _userListings =
           getMockListings().where((l) => l.createdBy == 'demo-user').toList();
       notifyListeners();
@@ -69,7 +65,6 @@ class ListingProvider with ChangeNotifier {
     }
   }
 
-  // Apply filters (search and category)
   void _applyFilters() {
     _filteredListings = _listings.where((listing) {
       bool matchesSearch = _searchQuery.isEmpty ||
@@ -82,21 +77,18 @@ class ListingProvider with ChangeNotifier {
     }).toList();
   }
 
-  // Set search query
   void setSearchQuery(String query) {
     _searchQuery = query;
     _applyFilters();
     notifyListeners();
   }
 
-  // Set category filter
   void setCategory(Category? category) {
     _selectedCategory = category;
     _applyFilters();
     notifyListeners();
   }
 
-  // Clear filters
   void clearFilters() {
     _searchQuery = '';
     _selectedCategory = null;
@@ -104,7 +96,6 @@ class ListingProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Create listing
   Future<bool> createListing(ListingModel listing) async {
     try {
       _isLoading = true;
@@ -112,7 +103,6 @@ class ListingProvider with ChangeNotifier {
       notifyListeners();
 
       if (DEMO_MODE) {
-        // In demo mode, add to local list
         await Future.delayed(const Duration(milliseconds: 500));
         _listings.add(listing);
         _userListings.add(listing);
@@ -132,7 +122,6 @@ class ListingProvider with ChangeNotifier {
     }
   }
 
-  // Update listing
   Future<bool> updateListing(ListingModel listing) async {
     try {
       _isLoading = true;
@@ -140,7 +129,6 @@ class ListingProvider with ChangeNotifier {
       notifyListeners();
 
       if (DEMO_MODE) {
-        // In demo mode, update in local list
         await Future.delayed(const Duration(milliseconds: 500));
         int index = _listings.indexWhere((l) => l.id == listing.id);
         if (index != -1) {
@@ -166,7 +154,6 @@ class ListingProvider with ChangeNotifier {
     }
   }
 
-  // Delete listing
   Future<bool> deleteListing(String listingId) async {
     try {
       _isLoading = true;
@@ -174,7 +161,6 @@ class ListingProvider with ChangeNotifier {
       notifyListeners();
 
       if (DEMO_MODE) {
-        // In demo mode, remove from local list
         await Future.delayed(const Duration(milliseconds: 500));
         _listings.removeWhere((l) => l.id == listingId);
         _userListings.removeWhere((l) => l.id == listingId);
@@ -194,13 +180,11 @@ class ListingProvider with ChangeNotifier {
     }
   }
 
-  // Clear user listings (called on sign out)
   void clearUserListings() {
     _userListings = [];
     notifyListeners();
   }
 
-  // Clear error message
   void clearError() {
     _errorMessage = null;
     notifyListeners();

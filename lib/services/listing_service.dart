@@ -6,7 +6,6 @@ class ListingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'listings';
 
-  // Get all listings as a stream
   Stream<List<ListingModel>> getAllListings() {
     return _firestore
         .collection(_collection)
@@ -19,7 +18,6 @@ class ListingService {
         });
   }
 
-  // Get listings by user
   Stream<List<ListingModel>> getListingsByUser(String userId) {
     return _firestore
         .collection(_collection)
@@ -33,7 +31,6 @@ class ListingService {
         });
   }
 
-  // Get listings by category
   Stream<List<ListingModel>> getListingsByCategory(Category category) {
     return _firestore
         .collection(_collection)
@@ -47,7 +44,6 @@ class ListingService {
         });
   }
 
-  // Create a new listing
   Future<void> createListing(ListingModel listing) async {
     try {
       await _firestore.collection(_collection).add(listing.toMap());
@@ -56,7 +52,6 @@ class ListingService {
     }
   }
 
-  // Update a listing
   Future<void> updateListing(ListingModel listing) async {
     try {
       if (listing.id == null) {
@@ -71,7 +66,6 @@ class ListingService {
     }
   }
 
-  // Delete a listing
   Future<void> deleteListing(String listingId) async {
     try {
       await _firestore.collection(_collection).doc(listingId).delete();
@@ -80,7 +74,6 @@ class ListingService {
     }
   }
 
-  // Get a single listing
   Future<ListingModel?> getListing(String listingId) async {
     try {
       DocumentSnapshot doc = await _firestore
@@ -96,7 +89,6 @@ class ListingService {
     }
   }
 
-  // Search listings by name
   Future<List<ListingModel>> searchListings(String query) async {
     try {
       QuerySnapshot snapshot = await _firestore.collection(_collection).get();
@@ -110,7 +102,6 @@ class ListingService {
           )
           .toList();
 
-      // Filter by name (case-insensitive)
       return allListings
           .where(
             (listing) =>
