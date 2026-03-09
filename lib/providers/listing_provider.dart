@@ -194,6 +194,12 @@ class ListingProvider with ChangeNotifier {
     }
   }
 
+  // Clear user listings (called on sign out)
+  void clearUserListings() {
+    _userListings = [];
+    notifyListeners();
+  }
+
   // Clear error message
   void clearError() {
     _errorMessage = null;

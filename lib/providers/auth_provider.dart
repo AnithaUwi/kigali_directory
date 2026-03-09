@@ -151,6 +151,12 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Get method to clear listings on sign out (to be called from UI)
+  void clearListingsOnSignOut(BuildContext context) {
+    // This should be called from the UI layer before signOut
+    // to ensure listing provider clears user data
+  }
+
   // Resend verification email
   Future<bool> resendVerificationEmail() async {
     try {

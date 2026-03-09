@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../providers/listing_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -262,6 +263,9 @@ class SettingsScreen extends StatelessWidget {
               );
 
               if (confirmed == true && context.mounted) {
+                // Clear user listings before signing out
+                Provider.of<ListingProvider>(context, listen: false)
+                    .clearUserListings();
                 await Provider.of<AuthProvider>(context, listen: false)
                     .signOut();
               }

@@ -14,10 +14,23 @@ class MyListingsScreen extends StatefulWidget {
 }
 
 class _MyListingsScreenState extends State<MyListingsScreen> {
+  String? _currentUserId;
+
   @override
   void initState() {
     super.initState();
     _initializeUserListings();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Re-initialize if user changed
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.user?.uid != _currentUserId) {
+      _currentUserId = authProvider.user?.uid;
+      _initializeUserListings();
+    }
   }
 
   void _initializeUserListings() {
@@ -26,6 +39,9 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
 
     if (authProvider.user != null) {
       listingProvider.initializeUserListingsStream(authProvider.user!.uid);
+    } else {
+      // User logged out, clear listings
+      listingProvider.clearUserListings();
     }
   }
 

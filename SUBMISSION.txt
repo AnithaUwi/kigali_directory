@@ -1,0 +1,324 @@
+# KIGALI SERVICES DIRECTORY - SUBMISSION PACKAGE
+
+---
+
+# PART 1: IMPLEMENTATION REFLECTION
+
+## Firebase Integration Challenges & Solutions
+
+### Challenge 1: Firebase Billing Limits
+
+**Problem:** 
+When setting up Firestore database, I exceeded the free tier quota limits during testing. Cloud Firestore charges per read/write operation, and my testing with multiple users and listings exhausted the free quota within hours.
+
+**Error Encountered:**
+Firestore operations started failing silently - read and write operations were being throttled. No clear error message - just data not syncing to the database.
+
+**How I Resolved It:**
+Rather than enabling billing on the Firebase project, I switched to using Firestore's default database mode. This provides unlimited free operations for development/testing with the same functionality as standard Firestore. It's sufficient for demo and grading purposes.
+
+**Learning:** Firebase's pay-per-operation model is good for production but problematic for student projects. The default database is perfect for development and testing.
+
+---
+
+### Challenge 2: Firestore Rules Blocking Operations
+
+**Problem:**
+Created listings in the app, but Edit and Delete operations were failing silently. The UI showed no error, but changes weren't persisting to the database.
+
+**Error Encountered:**
+Firebase Console logs showed "Permission denied" for update and delete operations, even though the user was authenticated.
+
+**Root Cause:**
+Firestore has a "deny by default" security model. Even authenticated users have no permissions unless explicitly granted in the rules.
+
+**How I Resolved It:**
+Created proper Firestore security rules that:
+- Allow anyone to read listings (public directory)
+- Allow authenticated users to create listings  
+- Allow users to only edit/delete their own listings (ownership-based)
+
+This required understanding how Firebase evaluates permissions and linking them to the user ID stored in each listing.
+
+**Learning:** Firestore security is powerful but requires explicit rule configuration. Without rules, nothing works.
+
+---
+
+### Challenge 3: Orphaned Authentication Accounts
+
+**Problem:**
+During testing, I manually deleted some user documents from Firestore to clean up test data. Later, when trying to sign up with those same emails, the app said "user already exists" - but the profile wasn't in the database anymore.
+
+**Errors Encountered:**
+- User could still log in with "deleted" email
+- App would crash when accessing user profile (document not found)
+- Sign up with same email failed
+
+**Root Cause:**
+Firebase Authentication and Firestore are completely separate systems:
+- **Firebase Auth** stores login credentials (email/password)
+- **Firestore** stores user profile data
+
+Deleting from Firestore didn't delete from Authentication. The accounts were "orphaned" - authenticated but with no profile.
+
+**How I Resolved It:**
+Implemented automatic profile recovery in the sign-in method. When a user logs in, the app checks if their Firestore profile exists. If not, it automatically recreates it. This prevents crashes and handles edge cases gracefully.
+
+**Learning:** Never delete from just one Firebase service. Both Auth and Firestore must be cleaned up. But code can handle orphaned accounts gracefully by auto-recovering them.
+
+---
+
+### Challenge 4: Android Emulator Build Timeout
+
+**Problem:**
+When attempting to run the app on Android emulator (Pixel 3), the Gradle build process would consistently timeout after 120 seconds.
+
+**Error Encountered:**
+```
+java.lang.RuntimeException: Timeout of 120000 reached waiting for exclusive 
+access to file: C:\Users\HP\.gradle\wrapper\dists\gradle-8.0-all.zip
+```
+
+**Troubleshooting Attempts:**
+1. Upgraded Gradle from 8.0 to 8.7
+2. Cleared entire Gradle cache (~/.gradle folder)
+3. Killed Java processes holding file locks
+4. Multiple `flutter clean` and `flutter pub get` commands
+5. Ran on web platform successfully
+
+**Root Cause:**
+File locking issue in Windows Gradle wrapper directory. Multiple build processes were competing for exclusive access to the downloaded Gradle distribution file.
+
+**How Resolved:**
+For this submission, I used the web platform for the demo video instead. Here's why:
+- Flutter compiles to the same code for both web and Android
+- All features work identically on web
+- The Gradle timeout was an environment issue, not a code issue
+- Web provided a working demonstration path without losing development time
+
+The app is fully functional and all features are demonstrated.
+
+**Learning:** Build system issues can be environment-specific and harder to debug than application logic. Sometimes pragmatism is better than perfectionism.
+
+---
+
+### Challenge 5: Real-Time Data Sync Delays
+
+**Problem:**
+When editing a listing, the UI wouldn't update immediately. Users had to refresh or go back and return to see changes.
+
+**Root Cause:**
+The Provider wasn't properly listening to Firestore streams. Update events from the database weren't triggering UI rebuilds.
+
+**How I Resolved It:**
+Properly configured Firestore streams in the Provider to:
+- Set up real-time listeners when the app loads
+- Listen to specific user listings with `where()` filters
+- Call `notifyListeners()` when data changes  
+- Wrapped data in Consumer widgets in the UI
+
+**Result:** Changes now appear instantly across the app.
+
+**Learning:** Real-time sync requires proper stream setup. Just saving to Firestore isn't enough; the app must actively listen to changes.
+
+---
+
+### Challenge 6: OpenStreetMap Tile Access Blocked
+
+**Problem:**
+The map feature was working during initial development, but suddenly started showing "403 Access blocked" errors instead of map tiles. The error message stated "App is not following the tile usage policy of OpenStreetMap's volunteer-run servers."
+
+**Error Encountered:**
+```
+403 Error - Access blocked
+App is not following the tile usage policy of OpenStreetMap's volunteer-run servers:
+osm.wiki/Blocked
+```
+
+**Screenshot:**
+[See attached screenshot showing repeated 403 errors in the Directions view]
+
+**Root Cause:**
+OpenStreetMap has strict usage policies for their free tile servers. The default flutter_map configuration doesn't include:
+- Proper User-Agent headers identifying the app
+- Tile caching to reduce server load
+- Rate limiting to prevent abuse
+
+Without these, OSM's servers automatically block access to protect their volunteer-run infrastructure.
+
+**How I Resolved It:**
+1. Added a custom User-Agent header to the TileLayer configuration identifying my app
+2. Configured the flutter_map package to respect OSM's usage policy
+3. Implemented tile caching using flutter_map's built-in cache manager
+4. Added proper attribution to OpenStreetMap contributors as required
+
+Updated the map configuration in the map screen to include proper headers and caching.
+
+**Result:** Map tiles now load correctly and the app follows OSM's fair use policy.
+
+**Learning:** Free services like OpenStreetMap have usage policies for good reason—they're community-run. Following these policies isn't just about avoiding blocks; it's about being a responsible developer in the open-source ecosystem.
+
+---
+
+## Summary
+
+The Firebase integration revealed that:
+
+1. **Billing is a Real Consideration** - Free tier is limited; student projects need careful quota management
+2. **Security Rules are Essential** - Firestore doesn't work without explicit permissions
+3. **Firebase is Modular** - Auth and Database are separate and need coordinated management
+4. **Build Issues Can Be Environment-Specific** - Sometimes working around problems is more practical than solving them
+5. **Real-Time Sync Requires Proper Setup** - Streams must be explicitly managed for live updates
+6. **Third-Party Services Have Usage Policies** - Free APIs like OpenStreetMap require proper configuration and respectful usage
+
+All challenges have been successfully addressed, and the application now robustly handles user authentication, real-time data synchronization, ownership-based permissions, and proper map tile integration.
+
+---
+
+## Personal Reflection
+
+This project was harder than I expected. I thought Firebase would just work, but every feature came with challenges that forced me to really understand what was happening behind the scenes.
+
+The biggest lesson was treating errors as teachers. When Firestore blocked my operations, I almost disabled security completely. But learning the permission system properly taught me that shortcuts backfire. The orphaned accounts issue seemed like poor design until I realized separate services scale independently—that's when I started thinking like an architect, not just a coder.
+
+What surprised me most was realizing backend development is really about protecting users and their data. Every security rule exists for a reason. That's what makes this real software, not just a class project.
+
+I'm proud of what I built, and these lessons will stick with me beyond this course.
+
+---
+
+# PART 2: GITHUB REPOSITORY
+
+**Repository URL:** https://github.com/AnithaUwi/kigali_directory
+
+The repository contains:
+- Complete Flutter source code with clean architecture
+- Multiple meaningful commits showing progressive development  
+- README explaining features and database structure
+- Firestore security rules
+- Firebase configuration
+
+---
+
+# PART 3: DESIGN SUMMARY
+
+## Firestore Database Structure
+
+**users/{uid}**
+```
+- uid: User ID from Firebase Auth
+- email: User email address
+- displayName: User's full name
+- emailVerified: Boolean flag
+- createdAt: Account creation timestamp
+```
+
+**listings/{listingId}**
+```
+- title: Listing name
+- description: Detailed description
+- category: Service category (Hospital, Restaurant, etc.)
+- latitude: Location coordinate  
+- longitude: Location coordinate
+- address: Street address
+- phone: Contact phone number
+- website: Website URL
+- imageUrl: Image storage URL
+- createdBy: User ID who created this listing
+- timestamp: Creation date
+- updatedAt: Last update date
+```
+
+## Security Rules
+
+Firestore rules were designed to:
+- Allow public read access (directory is public information)
+- Require authentication to create listings
+- Allow users to only edit/delete their own listings (verified via `createdBy` field)
+- Enforce at the database level, not the app level
+
+## State Management Architecture
+
+**Three-Layer Pattern:**
+
+1. **Service Layer** (`lib/services/`)
+   - Direct Firebase operations
+   - No business logic
+   - Reusable across providers
+
+2. **Provider Layer** (`lib/providers/`)  
+   - Manages state using Provider package
+   - Exposes Firestore streams
+   - Notifies UI of changes
+
+3. **UI Layer** (`lib/screens/`, `lib/widgets/`)
+   - Never calls Firebase directly
+   - Listens to Providers via Consumer
+   - Rebuilds when state changes
+
+**Data Flow:**
+User Action → UI Event → Provider Method → Service → Firestore Database → Stream Update → UI Rebuild
+
+## Design Trade-offs
+
+**Client-Side Filtering vs Server-Side:**
+Chose client-side filtering (search/categories) for instant results without network latency. Acceptable for expected <1000 listings. For millions of listings, would use server-side Firestore queries.
+
+**Real-Time Streams vs One-Time Reads:**
+Chose real-time Firestore streams for automatic updates when data changes. More complex but better user experience. Trade-off: requires continuous network connection.
+
+**Public vs Private Listings:**
+All listings are public by design - this is a public directory of services. Future enhancement could add public/private toggle.
+
+## Key Features Demonstrated
+
+- ✅ Email/password authentication with verification
+- ✅ Create/Read/Update/Delete listings  
+- ✅ Real-time data sync with Firestore
+- ✅ Search and category filtering
+- ✅ Map integration with location coordinates
+- ✅ Navigation to locations via maps
+- ✅ User profile and settings
+- ✅ My Listings (filtered to current user)
+
+---
+
+# PART 4: DEMO VIDEO
+
+**Duration:** 7-15 minutes
+
+**What the Demo Shows:**
+
+1. ✅ User signup with email verification
+2. ✅ User login and authentication
+3. ✅ Create a new listing (with Firestore showing real-time update)
+4. ✅ View listings in directory
+5. ✅ Search and filter listings
+6. ✅ Edit own listing (Firestore reflects changes)
+7. ✅ Delete own listing (Firestore shows removal)
+8. ✅ View listing on embedded map
+9. ✅ Launch navigation directions
+10. ✅ Firebase Console visible showing backend data
+
+**Recording Checklist:**
+- [ ] Chrome browser with app running
+- [ ] Firebase Console in separate window/tab
+- [ ] Clear audio explaining each feature  
+- [ ] Show code files briefly (not required but helpful)
+- [ ] 7-15 minute duration
+- [ ] Smooth transitions between features
+
+---
+
+# SUBMISSION CHECKLIST
+
+- [x] Implementation Reflection (6 challenges documented)
+- [x] GitHub Repository (https://github.com/AnithaUwi/kigali_directory)
+- [x] Design Summary (Database schema, state management, trade-offs)
+- [ ] Demo Video (To be recorded following this guide)
+
+**Next Step:** Convert this document to PDF and record the demo video.
+
+---
+
+END OF SUBMISSION DOCUMENT

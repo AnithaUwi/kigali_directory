@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/listing_provider.dart';
 import 'dart:async';
 
 class EmailVerificationScreen extends StatefulWidget {
@@ -129,6 +130,9 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () async {
+                  // Clear user listings before signing out
+                  Provider.of<ListingProvider>(context, listen: false)
+                      .clearUserListings();
                   await authProvider.signOut();
                 },
                 child: const Text('Sign Out'),

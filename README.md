@@ -2,9 +2,9 @@
 
 A comprehensive Flutter mobile application for locating and navigating to essential public services and places in Kigali, Rwanda. Built with Firebase Authentication, Cloud Firestore, Google Maps integration, and clean architecture using Provider state management.
 
-## 📱 Features
+##  Features
 
-### ✅ Implemented Features
+###  Implemented Features
 
 1. **Authentication**
    - Email/password sign up and sign in
