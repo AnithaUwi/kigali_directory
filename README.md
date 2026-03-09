@@ -43,7 +43,7 @@ A comprehensive Flutter mobile application for locating and navigating to essent
    - Location-based notification toggle
    - Sign out functionality
 
-## 🏗️ Architecture
+##  Architecture
 
 ### Project Structure
 
@@ -101,7 +101,7 @@ This application uses **Provider** for state management with a clear separation 
 6. Provider notifies listeners
 7. UI rebuilds with new data
 
-## 🔥 Firestore Database Structure
+##  Firestore Database Structure
 
 ### Collections
 
@@ -153,7 +153,7 @@ service cloud.firestore {
 }
 ```
 
-## 🚀 Setup Instructions
+##  Setup Instructions
 
 ### Prerequisites
 
@@ -312,7 +312,7 @@ flutter build apk --release
 flutter build ios --release
 ```
 
-## 🧪 Testing
+##  Testing
 
 ### Test Credentials
 Create a test account through the app's sign-up screen.
@@ -333,7 +333,7 @@ You can create sample listings with these Kigali locations:
    - Category: Tourist Attraction
    - Coordinates: -1.9441, 30.0619
 
-## 📖 Usage Guide
+##  Usage Guide
 
 ### Creating a Listing
 1. Sign in to your account
