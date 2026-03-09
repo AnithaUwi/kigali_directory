@@ -391,12 +391,12 @@ You can create sample listings with these Kigali locations:
 
 This project is for educational purposes as part of a mobile development course.
 
-## 👨‍💻 Author
+##  Author
 
-[Your Name]
-[Your Email]
+Anitha Uwimpuhwe
 
-## 🙏 Acknowledgments
+
+##  Acknowledgments
 
 - Firebase for backend infrastructure
 - Google Maps Platform for mapping services
