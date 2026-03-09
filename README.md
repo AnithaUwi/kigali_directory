@@ -24,12 +24,12 @@ A comprehensive Flutter mobile application for locating and navigating to essent
    - Filter by category (Hospital, Police Station, Library, Restaurant, Café, Park, Tourist Attraction, Utility Office)
    - Dynamic real-time filtering
 
-4. **Google Maps Integration**
-   - Embedded maps on detail pages
+4. **Map Integration**
+   - Embedded maps on detail pages using OpenStreetMap
    - Location markers for all listings
-   - Map view of all services
-   - Turn-by-turn navigation via Google Maps
-   - Current location support
+   - Interactive map view of all services
+   - Turn-by-turn navigation via external maps app
+   - Latitude/longitude coordinate support
 
 5. **Navigation**
    - Bottom navigation bar with 4 screens:
@@ -140,14 +140,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
-      allow read: if request.auth != null;
+      allow read: if request.auth.uid == userId;
       allow write: if request.auth.uid == userId;
     }
     
     match /listings/{listingId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.createdBy;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.createdBy;
+      allow read: if true;  // Public directory - anyone can view
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth.uid == resource.data.createdBy;  // Own listings only
     }
   }
 }
@@ -159,7 +159,6 @@ service cloud.firestore {
 
 - Flutter SDK (3.0.0 or higher)
 - Firebase account
-- Google Maps API key
 - Android Studio / VS Code
 - Physical device or emulator
 
@@ -207,56 +206,7 @@ flutter pub get
 3. Start in test mode (then add security rules)
 4. Choose your region (closest to Rwanda)
 
-### 4. Google Maps API Setup
-
-#### A. Get API Key
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create new project or select existing
-3. Enable these APIs:
-   - Maps SDK for Android
-   - Maps SDK for iOS
-   - Directions API
-4. Create credentials > API Key
-5. Restrict key (optional but recommended)
-
-#### B. Configure Android
-
-Edit `android/app/src/main/AndroidManifest.xml`:
-
-```xml
-<manifest ...>
-  <application ...>
-    <meta-data
-        android:name="com.google.android.geo.API_KEY"
-        android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
-    ...
-  </application>
-</manifest>
-```
-
-#### C. Configure iOS
-
-Edit `ios/Runner/AppDelegate.swift`:
-
-```swift
-import UIKit
-import Flutter
-import GoogleMaps
-
-@UIApplicationMain
-@objc class AppDelegate: FlutterAppDelegate {
-  override func application(
-    _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-  ) -> Bool {
-    GMSServices.provideAPIKey("YOUR_GOOGLE_MAPS_API_KEY")
-    GeneratedPluginRegistrant.register(with: self)
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-  }
-}
-```
-
-### 5. Android Configuration
+### 4. Android Configuration
 
 Edit `android/app/build.gradle`:
 
@@ -279,7 +229,7 @@ Add permissions to `android/app/src/main/AndroidManifest.xml`:
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 ```
 
-### 6. iOS Configuration
+### 5. iOS Configuration
 
 Edit `ios/Podfile`:
 
@@ -296,7 +246,7 @@ Add to `ios/Runner/Info.plist`:
 <string>This app needs your location to show nearby services</string>
 ```
 
-### 7. Run the App
+### 6. Run the App
 
 ```bash
 # Check for issues
@@ -366,7 +316,7 @@ You can create sample listings with these Kigali locations:
 - **Flutter** - UI framework
 - **Firebase Authentication** - User authentication
 - **Cloud Firestore** - Cloud database
-- **Google Maps Flutter** - Map integration
+- **flutter_map** - Map integration (OpenStreetMap)
 - **Provider** - State management
 - **Geolocator** - Location services
 - **URL Launcher** - External navigation
@@ -404,4 +354,4 @@ Anitha Uwimpuhwe
 
 ---
 
-**Note**: Remember to never commit your `google-services.json`, `GoogleService-Info.plist`, or API keys to version control. Add them to `.gitignore`.
+**Note**: Remember to never commit your `google-services.json` or `GoogleService-Info.plist` files to version control. Add them to `.gitignore`.
