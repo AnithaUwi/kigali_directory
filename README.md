@@ -361,7 +361,7 @@ You can create sample listings with these Kigali locations:
 3. Use edit icon or options menu
 4. Confirm deletion when prompted
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 - **Flutter** - UI framework
 - **Firebase Authentication** - User authentication
@@ -371,14 +371,14 @@ You can create sample listings with these Kigali locations:
 - **Geolocator** - Location services
 - **URL Launcher** - External navigation
 
-## 📝 Known Issues & Limitations
+##  Known Issues & Limitations
 
 1. Search is case-insensitive but requires exact substring matches
 2. Location permissions must be granted manually on iOS
 3. App requires internet connection for all functionality
 4. Email verification link expires after 24 hours
 
-## 🔮 Future Enhancements
+##  Future Enhancements
 
 - [ ] Offline mode with local caching
 - [ ] Image uploads for listings
@@ -387,7 +387,7 @@ You can create sample listings with these Kigali locations:
 - [ ] Multi-language support (Kinyarwanda, French, English)
 - [ ] Advanced search filters (distance, rating, open now)
 
-## 📄 License
+##  License
 
 This project is for educational purposes as part of a mobile development course.
 
