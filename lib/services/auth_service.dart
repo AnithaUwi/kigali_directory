@@ -55,6 +55,19 @@ class AuthService {
         throw Exception('Please verify your email before signing in');
       }
 
+      // Check if Firestore profile exists, create if missing
+      // (This handles cases where profile was manually deleted from database)
+      if (userCredential.user != null) {
+        final profileExists = await _checkUserProfileExists(userCredential.user!.uid);
+        if (!profileExists) {
+          // Recreate missing profile
+          await _createUserProfile(
+            userCredential.user!,
+            userCredential.user!.displayName ?? 'User',
+          );
+        }
+      }
+
       return userCredential;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
@@ -91,6 +104,16 @@ class AuthService {
     );
 
     await _firestore.collection('users').doc(user.uid).set(userModel.toMap());
+  }
+
+  // Check if user profile exists in Firestore
+  Future<bool> _checkUserProfileExists(String uid) async {
+    try {
+      DocumentSnapshot doc = await _firestore.collection('users').doc(uid).get();
+      return doc.exists;
+    } catch (e) {
+      return false;
+    }
   }
 
   // Get user profile from Firestore
